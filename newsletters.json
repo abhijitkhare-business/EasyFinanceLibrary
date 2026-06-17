@@ -1,0 +1,16 @@
+[
+  {
+    "id": "1",
+    "title": "Weekly Market Pulse",
+    "issue": "Issue #1",
+    "date": "June 2026",
+    "topic": "Stock Market",
+    "bg": "#E3F2FD",
+    "accent": "#135E2D",
+    "emoji": "📈",
+    "hot": true,
+    "description": "Short description of this newsletter issue.",
+    "coverUrl": "",
+    "content": "Weekly News Update\n\n─────────────────────────\n📊 TOP STORY: Markets Rise\n─────────────────────────\n\nThis is the text for section one.\n\n─────────────────────────\n💡 INSIGHT: Saving Tips\n─────────────────────────\n\nThis is the text for section two."
+  }
+]
