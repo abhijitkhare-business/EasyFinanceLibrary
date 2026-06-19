@@ -9,6 +9,7 @@ import {
   View,
   Dimensions,
   FlatList,
+  Image,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -86,7 +87,7 @@ export default function ReaderScreen() {
   const pages = item
     ? (isNewsletter
         ? item.content.split('─────────────────────────').map(p => p.trim()).filter(Boolean)
-        : item.content.split(/(?=Chapter \d+)/).map(p => p.trim()).filter(Boolean))
+        : item.content.split(/(?:\r?\n)+(?=Chapter \d+)/).map(p => p.trim()).filter(Boolean))
     : [];
 
   const totalPages = pages.length;
@@ -316,8 +317,11 @@ export default function ReaderScreen() {
       return lines[0].replace(/[📊💡📈🎯]/g, '').trim() || `Section ${idx + 1}`;
     } else {
       // Find chapter header
-      const match = text.match(/Chapter \d+:[^\n]+/);
-      return match ? match[0].trim() : `Chapter ${idx + 1}`;
+      const match = text.match(/Chapter \d+(?::[^\n]+)?/);
+      if (match && text.trim().startsWith(match[0])) {
+        return match[0].trim();
+      }
+      return idx === 0 ? "Table of Contents" : `Chapter ${idx}`;
     }
   };
 
@@ -325,6 +329,84 @@ export default function ReaderScreen() {
 
   // Compute progress percentage
   const progressPercent = totalPages > 0 ? ((currentPageIndex + 1) / totalPages) * 100 : 0;
+
+  const parseBoldText = (text: string) => {
+    if (!text.includes('**')) return text;
+    
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    return parts.map((part, idx) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return (
+          <Text key={idx} style={{ fontWeight: 'bold', color: Theme.text.primary }}>
+            {part.slice(2, -2)}
+          </Text>
+        );
+      }
+      return part;
+    });
+  };
+
+  const renderContent = (text: string) => {
+    if (!text) return null;
+
+    // Split text by markdown image tags: ![alt text](url)
+    const parts = text.split(/(!\[.*?\]\(.*?\))/g);
+    return parts.map((part, index) => {
+      const match = part.match(/!\[(.*?)\]\((.*?)\)/);
+      if (match) {
+        const altText = match[1];
+        const imageUrl = match[2];
+        return (
+          <View key={index} style={styles.contentImageContainer}>
+            <Image source={{ uri: imageUrl }} style={styles.contentImage} resizeMode="contain" />
+            {altText ? <Text style={styles.imageCaption}>{altText}</Text> : null}
+          </View>
+        );
+      }
+
+      // Process text part line-by-line for headings and paragraph spacing
+      const lines = part.split('\n');
+      return (
+        <View key={index} style={{ width: '100%' }}>
+          {lines.map((line, lineIdx) => {
+            const trimmed = line.trim();
+            
+            // Handle H2: ## Heading Title
+            if (trimmed.startsWith('## ')) {
+              const headingText = trimmed.replace(/^##\s+/, '');
+              return (
+                <Text key={lineIdx} style={styles.heading2}>
+                  {headingText}
+                </Text>
+              );
+            }
+            
+            // Handle H3: ### Heading Title
+            if (trimmed.startsWith('### ')) {
+              const headingText = trimmed.replace(/^###\s+/, '');
+              return (
+                <Text key={lineIdx} style={styles.heading3}>
+                  {headingText}
+                </Text>
+              );
+            }
+            
+            // Empty line: render a small spacer
+            if (line === '') {
+              return <View key={lineIdx} style={{ height: 10 }} />;
+            }
+            
+            // Standard text line
+            return (
+              <Text key={lineIdx} style={[styles.contentText, { fontSize, lineHeight: fontSize * 1.65 }]}>
+                {parseBoldText(line)}
+              </Text>
+            );
+          })}
+        </View>
+      );
+    });
+  };
 
   if (!item) return null;
 
@@ -399,9 +481,7 @@ export default function ReaderScreen() {
         contentContainerStyle={styles.readerContent}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={[styles.contentText, { fontSize, lineHeight: fontSize * 1.65 }]}>
-          {currentPageContent}
-        </Text>
+        {renderContent(currentPageContent)}
         
         {/* End of Section indicator */}
         {currentPageIndex === totalPages - 1 && (
@@ -932,5 +1012,38 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 3,
     elevation: 3,
+  },
+  contentImageContainer: {
+    width: '100%',
+    marginVertical: 16,
+    alignItems: 'center',
+  },
+  contentImage: {
+    width: '100%',
+    height: 220,
+    borderRadius: 12,
+    backgroundColor: '#EAF5EE',
+  },
+  imageCaption: {
+    fontSize: 12,
+    color: Theme.text.secondary,
+    marginTop: 6,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  heading2: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: Theme.green.primary,
+    marginTop: 22,
+    marginBottom: 10,
+    letterSpacing: 0.2,
+  },
+  heading3: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: Theme.text.primary,
+    marginTop: 16,
+    marginBottom: 8,
   },
 });
