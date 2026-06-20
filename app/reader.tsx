@@ -87,7 +87,7 @@ export default function ReaderScreen() {
   const pages = item
     ? (isNewsletter
         ? item.content.split('─────────────────────────').map(p => p.trim()).filter(Boolean)
-        : item.content.split(/(?:\r?\n)+(?=#? ?Chapter \d+)/).map(p => p.trim()).filter(Boolean))
+        : item.content.split(/(?:\r?\n)+(?=# Chapter \d+)/).map(p => p.trim()).filter(Boolean))
     : [];
 
   const totalPages = pages.length;
@@ -359,8 +359,7 @@ export default function ReaderScreen() {
         const imageUrl = match[2];
         return (
           <View key={index} style={styles.contentImageContainer}>
-            <Image source={{ uri: imageUrl }} style={styles.contentImage} resizeMode="contain" />
-            {altText ? <Text style={styles.imageCaption}>{altText}</Text> : null}
+            <Image source={{ uri: imageUrl }} style={styles.contentImage} resizeMode="cover" />
           </View>
         );
       }
@@ -1035,7 +1034,7 @@ const styles = StyleSheet.create({
   },
   contentImage: {
     width: '100%',
-    height: 220,
+    aspectRatio: 16 / 9,
     borderRadius: 12,
     backgroundColor: '#EAF5EE',
   },
