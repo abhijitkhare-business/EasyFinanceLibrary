@@ -94,7 +94,7 @@ export default function ReaderScreen() {
   const pages = item
     ? (isNewsletter
         ? item.content.split('─────────────────────────').map(p => p.trim()).filter(Boolean)
-        : item.content.split(/(?:\r?\n)+(?=# Chapter \d+|# Conclusion)/).map(p => p.trim()).filter(Boolean))
+        : item.content.split(/(?:\r?\n)+(?=# Chapter\s*(?:-\s*)?\d+|# Conclusion)/).map(p => p.trim()).filter(Boolean))
     : [];
 
   const totalPages = pages.length;
@@ -325,7 +325,7 @@ export default function ReaderScreen() {
     } else {
       // Find chapter header in the first few lines
       const firstLines = text.split('\n').slice(0, 3).join('\n');
-      const match = firstLines.match(/^#?\s*(Chapter \d+.*)$/m);
+      const match = firstLines.match(/^#?\s*(Chapter\s*(?:-\s*)?\d+.*)$/m);
       if (match) {
         return match[1].trim();
       }
@@ -381,7 +381,7 @@ export default function ReaderScreen() {
             // Handle H1: # Heading Title, or exact match for "Table of Contents", or starts with "Chapter \d+"
             const isH1Markdown = trimmed.startsWith('# ');
             const isTOC = trimmed.toLowerCase() === 'table of contents';
-            const isChapterTitle = /^chapter \d+/i.test(trimmed);
+            const isChapterTitle = /^chapter\s*(?:-\s*)?\d+/i.test(trimmed);
             
             if (isH1Markdown || isTOC || isChapterTitle) {
               const headingText = isH1Markdown ? trimmed.replace(/^#\s+/, '') : trimmed;
