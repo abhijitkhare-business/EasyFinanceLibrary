@@ -15,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Theme } from '../../constants/theme';
 import { useCMS } from '../../hooks/useCMS';
 
-const TOPICS = ['All', 'Mutual Funds', 'Stock Market', 'Tax Planning', 'SIP & Investing'];
+const TOPICS = ['All', 'Personal Finance', 'Mutual Funds', 'Stock Market'];
 
 export default function NewsletterScreen() {
   const router = useRouter();
