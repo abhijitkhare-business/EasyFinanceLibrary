@@ -93,7 +93,7 @@ export default function ReaderScreen() {
   // Split content into pages/chapters safely
   const pages = item
     ? (isNewsletter
-        ? item.content.split('─────────────────────────').map(p => p.trim()).filter(Boolean)
+        ? [item.content]
         : item.content.split(/(?:\r?\n)+(?=# Chapter\s*(?:-\s*)?\d+|# Conclusion)/).map(p => p.trim()).filter(Boolean))
     : [];
 
@@ -525,9 +525,11 @@ export default function ReaderScreen() {
       </ScrollView>
 
       {/* ── Progress Line Indicator ── */}
-      <View style={styles.progressBarBg}>
-        <View style={[styles.progressBarFill, { width: `${progressPercent}%` }]} />
-      </View>
+      {!isNewsletter && (
+        <View style={styles.progressBarBg}>
+          <View style={[styles.progressBarFill, { width: `${progressPercent}%` }]} />
+        </View>
+      )}
 
       {/* ── Audio Player Control Panel ── */}
       {showAudio && (
@@ -632,36 +634,38 @@ export default function ReaderScreen() {
       )}
 
       {/* ── Bottom Controls ── */}
-      <View style={[styles.bottomBar, { paddingBottom: 12 + insets.bottom }]}>
-        <TouchableOpacity 
-          style={[styles.bottomBtn, currentPageIndex === 0 && styles.disabledBtn]} 
-          onPress={() => handlePageChange(currentPageIndex - 1)}
-          disabled={currentPageIndex === 0}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="chevron-back" size={20} color={currentPageIndex === 0 ? Theme.text.muted : Theme.text.primary} />
-          <Text style={[styles.bottomBtnText, currentPageIndex === 0 && styles.disabledBtnText]}>Prev</Text>
-        </TouchableOpacity>
+      {!isNewsletter && (
+        <View style={[styles.bottomBar, { paddingBottom: 12 + insets.bottom }]}>
+          <TouchableOpacity 
+            style={[styles.bottomBtn, currentPageIndex === 0 && styles.disabledBtn]} 
+            onPress={() => handlePageChange(currentPageIndex - 1)}
+            disabled={currentPageIndex === 0}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="chevron-back" size={20} color={currentPageIndex === 0 ? Theme.text.muted : Theme.text.primary} />
+            <Text style={[styles.bottomBtnText, currentPageIndex === 0 && styles.disabledBtnText]}>Prev</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={styles.tocBtn} 
-          onPress={() => setShowToc(true)}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="list" size={20} color={Theme.green.primary} />
-          <Text style={styles.tocText}>Page {currentPageIndex + 1} of {totalPages}</Text>
-        </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.tocBtn} 
+            onPress={() => setShowToc(true)}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="list" size={20} color={Theme.green.primary} />
+            <Text style={styles.tocText}>Page {currentPageIndex + 1} of {totalPages}</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={[styles.bottomBtn, currentPageIndex === totalPages - 1 && styles.disabledBtn]} 
-          onPress={() => handlePageChange(currentPageIndex + 1)}
-          disabled={currentPageIndex === totalPages - 1}
-          activeOpacity={0.7}
-        >
-          <Text style={[styles.bottomBtnText, currentPageIndex === totalPages - 1 && styles.disabledBtnText]}>Next</Text>
-          <Ionicons name="chevron-forward" size={20} color={currentPageIndex === totalPages - 1 ? Theme.text.muted : Theme.text.primary} />
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity 
+            style={[styles.bottomBtn, currentPageIndex === totalPages - 1 && styles.disabledBtn]} 
+            onPress={() => handlePageChange(currentPageIndex + 1)}
+            disabled={currentPageIndex === totalPages - 1}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.bottomBtnText, currentPageIndex === totalPages - 1 && styles.disabledBtnText]}>Next</Text>
+            <Ionicons name="chevron-forward" size={20} color={currentPageIndex === totalPages - 1 ? Theme.text.muted : Theme.text.primary} />
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* ── Table of Contents (TOC) Overlay Modal ── */}
       {showToc && (
